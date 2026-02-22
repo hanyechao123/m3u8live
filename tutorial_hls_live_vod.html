@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLS 直播与点播差异：EXT-X-ENDLIST 到缓存策略</title>
+    <meta name="description" content="HLS 直播与点播核心差异：清单更新机制、缓存策略、延迟与稳定性。">
+    <style>
+        :root { --bg:#f2f8ff; --ink:#1a1a1a; --border:#dbe9f7; --card:#fff; --shadow:0 14px 40px rgba(10,10,10,.12); }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; background:radial-gradient(1200px 500px at 10% -10%, #e9f4ff 0%, transparent 60%), radial-gradient(900px 420px at 95% 10%, #dcebff 0%, transparent 65%), var(--bg); color:var(--ink); }
+        .hd { height:56px; border-bottom:1px solid var(--border); background:rgba(255,255,255,.75); }
+        .link-list { max-width:900px; height:100%; margin:0 auto; padding:0 16px; display:flex; align-items:center; gap:14px; }
+        .brand { margin-right:auto; font-weight:700; }
+        .link-list a { color:var(--ink); text-decoration:none; font-size:14px; }
+        .main { max-width:900px; margin:0 auto; padding:24px 16px 64px; }
+        .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; box-shadow:var(--shadow); line-height:1.8; }
+        h1 { font-size:28px; margin-bottom:10px; }
+        h2 { font-size:18px; margin:14px 0 6px; }
+    </style>
+</head>
+<body>
+<header class="hd">
+    <div class="link-list">
+        <span class="brand">M3U8 Player</span>
+        <a href="/">首页</a>
+        <a href="/tutorials.html">教程中心</a>
+        <a href="/help.html">帮助中心</a>
+    </div>
+</header>
+<main class="main">
+    <article class="card">
+        <h1>HLS 直播与点播差异</h1>
+        <p>理解直播和点播差异，有助于定位“为什么同一播放器在两种流上表现不一样”。</p>
+        <h2>点播（VOD）</h2>
+        <p>通常有 <code>#EXT-X-ENDLIST</code>，清单稳定不变，适合预加载和快进回退。</p>
+        <h2>直播（Live）</h2>
+        <p>清单会持续刷新，<code>MEDIA-SEQUENCE</code> 递增，播放器需要不断拉取最新分片。</p>
+        <h2>常见问题差异</h2>
+        <p>直播更容易出现延迟累积、追帧失败和断流；点播更常见是某个片段损坏导致进度卡住。</p>
+    </article>
+</main>
+</body>
+</html>

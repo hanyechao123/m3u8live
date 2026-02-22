@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLS 自适应码率（ABR）原理与常见现象</title>
+    <meta name="description" content="ABR 码率切换原理：带宽估计、清晰度变化、缓冲与稳定性平衡。">
+    <style>
+        :root { --bg:#f2f8ff; --ink:#1a1a1a; --border:#dbe9f7; --card:#fff; --shadow:0 14px 40px rgba(10,10,10,.12); }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; background:radial-gradient(1200px 500px at 10% -10%, #e9f4ff 0%, transparent 60%), radial-gradient(900px 420px at 95% 10%, #dcebff 0%, transparent 65%), var(--bg); color:var(--ink); }
+        .hd { height:56px; border-bottom:1px solid var(--border); background:rgba(255,255,255,.75); }
+        .link-list { max-width:900px; height:100%; margin:0 auto; padding:0 16px; display:flex; align-items:center; gap:14px; }
+        .brand { margin-right:auto; font-weight:700; }
+        .link-list a { color:var(--ink); text-decoration:none; font-size:14px; }
+        .main { max-width:900px; margin:0 auto; padding:24px 16px 64px; }
+        .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; box-shadow:var(--shadow); line-height:1.8; }
+        h1 { font-size:28px; margin-bottom:10px; }
+        h2 { font-size:18px; margin:14px 0 6px; }
+    </style>
+</head>
+<body>
+<header class="hd">
+    <div class="link-list">
+        <span class="brand">M3U8 Player</span>
+        <a href="/">首页</a>
+        <a href="/tutorials.html">教程中心</a>
+        <a href="/help.html">帮助中心</a>
+    </div>
+</header>
+<main class="main">
+    <article class="card">
+        <h1>HLS 自适应码率（ABR）原理</h1>
+        <p>ABR 的目标不是“永远最清晰”，而是在当前网络条件下保证尽可能连续播放。</p>
+        <h2>基本机制</h2>
+        <p>播放器根据近期下载速度估算带宽，在主清单中选择合适码率的子清单拉取分片。</p>
+        <h2>为什么会突然变模糊</h2>
+        <p>当网络抖动时，播放器会主动降码率避免卡顿；网络恢复后再逐步升码率。</p>
+        <h2>优化建议</h2>
+        <p>多码率档位间差距不要过大；分片时长保持稳定；避免频繁切换带来的观感抖动。</p>
+    </article>
+</main>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M3U8 播放失败排障：从链接到编码的定位流程</title>
+    <meta name="description" content="M3U8 排障指南：403、CORS、卡顿、只有声音没图像等问题定位步骤。">
+    <style>
+        :root { --bg:#f2f8ff; --ink:#1a1a1a; --muted:#5b748f; --accent:#2f79bf; --card:#fff; --border:#dbe9f7; --shadow:0 14px 40px rgba(10,10,10,.12); }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:var(--ink); background:radial-gradient(1200px 500px at 10% -10%, #e9f4ff 0%, transparent 60%), radial-gradient(900px 420px at 95% 10%, #dcebff 0%, transparent 65%), var(--bg); }
+        .hd { height:56px; border-bottom:1px solid var(--border); background:rgba(255,255,255,.75); }
+        .link-list { max-width:900px; height:100%; margin:0 auto; padding:0 16px; display:flex; align-items:center; gap:14px; }
+        .brand { margin-right:auto; font-weight:700; }
+        .link-list a { color:var(--ink); text-decoration:none; font-size:14px; }
+        .main { max-width:900px; margin:0 auto; padding:28px 16px 64px; }
+        .article { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow); line-height:1.8; }
+        h1 { font-size:30px; margin-bottom:10px; }
+        h2 { font-size:20px; margin:18px 0 8px; }
+        ul { padding-left:20px; }
+        li { margin-bottom:6px; color:#243648; }
+    </style>
+</head>
+<body>
+    <header class="hd">
+        <div class="link-list">
+            <span class="brand">M3U8 Player</span>
+            <a href="/">首页</a>
+            <a href="/tutorials.html">教程中心</a>
+            <a href="/help.html">帮助中心</a>
+        </div>
+    </header>
+    <main class="main">
+        <article class="article">
+            <h1>M3U8 播放失败排障：从链接到编码的定位流程</h1>
+            <p>排障建议按照固定顺序做：先看链接可访问性，再看跨域和鉴权，最后看编码兼容。顺序错了会浪费大量时间。</p>
+
+            <h2>步骤 1：确认链接有效</h2>
+            <ul>
+                <li>直接在浏览器打开 m3u8，至少能返回文本内容。</li>
+                <li>检查分片 URL 是否可访问，避免 m3u8 可用但 ts 全部 403。</li>
+                <li>签名参数有时效，过期后需要重新生成 URL。</li>
+            </ul>
+
+            <h2>步骤 2：检查 CORS</h2>
+            <ul>
+                <li>浏览器开发者工具看 Network/Console，是否存在 CORS 报错。</li>
+                <li>服务端至少要允许来源和必要请求头，分片与清单都要放行。</li>
+            </ul>
+
+            <h2>步骤 3：区分“解码失败”与“网络失败”</h2>
+            <ul>
+                <li>有声音没画面：常见是编码兼容问题（例如 HEVC）。</li>
+                <li>频繁缓冲：优先怀疑网络波动和分片体积过大。</li>
+                <li>开头能播后面中断：直播源更新异常或 token 过期。</li>
+            </ul>
+
+            <h2>步骤 4：需要转码时怎么做</h2>
+            <ul>
+                <li>优先转到 H.264 + AAC，兼容性最高。</li>
+                <li>先用低分辨率快速验证，再做高质量导出。</li>
+                <li>生产环境建议做任务队列，避免多个 ffmpeg 并发打满 CPU。</li>
+            </ul>
+        </article>
+    </main>
+</body>
+</html>

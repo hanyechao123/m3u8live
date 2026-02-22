@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VLC 播放 M3U8：快速验证链接可用性</title>
+    <meta name="description" content="使用 VLC 播放 M3U8 的步骤与排障建议。">
+    <style>
+        :root { --bg:#f2f8ff; --ink:#1a1a1a; --border:#dbe9f7; --card:#fff; --shadow:0 14px 40px rgba(10,10,10,.12); }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; background:radial-gradient(1200px 500px at 10% -10%, #e9f4ff 0%, transparent 60%), radial-gradient(900px 420px at 95% 10%, #dcebff 0%, transparent 65%), var(--bg); color:var(--ink); }
+        .hd { height:56px; border-bottom:1px solid var(--border); background:rgba(255,255,255,.75); }
+        .link-list { max-width:900px; height:100%; margin:0 auto; padding:0 16px; display:flex; align-items:center; gap:14px; }
+        .brand { margin-right:auto; font-weight:700; }
+        .link-list a { color:var(--ink); text-decoration:none; font-size:14px; }
+        .main { max-width:900px; margin:0 auto; padding:24px 16px 64px; }
+        .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; box-shadow:var(--shadow); line-height:1.8; }
+        h1 { font-size:28px; margin-bottom:10px; }
+        h2 { font-size:18px; margin:14px 0 6px; }
+    </style>
+</head>
+<body>
+<header class="hd">
+    <div class="link-list">
+        <span class="brand">M3U8 Player</span>
+        <a href="/">首页</a>
+        <a href="/tutorials.html">教程中心</a>
+        <a href="/help.html">帮助中心</a>
+    </div>
+</header>
+<main class="main">
+    <article class="card">
+        <h1>VLC 播放 M3U8：快速验证链接可用性</h1>
+        <p>当网页播放器报错时，先用 VLC 验证链接本身是非常高效的排查手段。</p>
+        <h2>操作步骤</h2>
+        <p>1) 打开 VLC；2) 菜单“媒体 -> 打开网络串流”；3) 粘贴 m3u8 链接并播放。</p>
+        <h2>如何解读结果</h2>
+        <p>VLC 可播但浏览器不可播：通常是 CORS 或浏览器编码兼容问题。两者都不可播：大概率是链接、签名或源站问题。</p>
+    </article>
+</main>
+</body>
+</html>

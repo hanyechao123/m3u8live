@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M3U8 教程中心 | m3u8live.cn</title>
+    <meta name="description" content="M3U8 教程中心：入门说明、CORS 跨域、直播与点播差异、VLC 播放、常见错误排障。">
+    <style>
+        :root {
+            --bg: #f2f8ff;
+            --ink: #1a1a1a;
+            --muted: #5b748f;
+            --accent: #2f79bf;
+            --card: #ffffff;
+            --border: #dbe9f7;
+            --shadow: 0 14px 40px rgba(10, 10, 10, 0.12);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            min-height: 100vh;
+            background: radial-gradient(1200px 500px at 10% -10%, #e9f4ff 0%, transparent 60%),
+                        radial-gradient(900px 420px at 95% 10%, #dcebff 0%, transparent 65%),
+                        var(--bg);
+            color: var(--ink);
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        }
+        a { color: var(--accent); text-decoration: none; }
+        .hd { height: 56px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,.75); backdrop-filter: blur(8px); }
+        .link-list { max-width: 980px; height: 100%; margin: 0 auto; padding: 0 18px; display: flex; align-items: center; gap: 18px; }
+        .brand { margin-right: auto; font-weight: 700; color: var(--ink); }
+        .link-list a { color: var(--ink); font-size: 14px; padding: 6px 10px; border-radius: 999px; }
+        .link-list a:hover { background: #e3f0ff; }
+        .main { max-width: 980px; margin: 0 auto; padding: 28px 16px 64px; }
+        .hero { margin-bottom: 16px; }
+        .hero h1 { font-size: 34px; }
+        .hero p { color: var(--muted); margin-top: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: var(--shadow);
+        }
+        .card h2 { font-size: 17px; margin-bottom: 8px; }
+        .card p { font-size: 14px; color: var(--muted); min-height: 66px; }
+        .card a { display: inline-block; margin-top: 10px; font-size: 14px; }
+        .footer { margin-top: 20px; font-size: 13px; color: var(--muted); }
+        .links a { margin-right: 10px; }
+        @media screen and (max-width: 900px) {
+            .grid { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 30px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="hd">
+        <div class="link-list">
+            <span class="brand">M3U8 Player</span>
+            <a href="/">首页</a>
+            <a href="/m3u8_to_mp4.html">M3U8转MP4</a>
+            <a href="/tutorials.html">教程</a>
+            <a href="/about.html">关于</a>
+            <a href="/help.html">帮助中心</a>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="hero">
+            <h1>M3U8 教程中心</h1>
+            <p>这里汇总了最常见的 M3U8 场景指南，覆盖入门、播放、排障与多端使用。</p>
+        </section>
+
+        <section class="grid">
+            <article class="card">
+                <h2>M3U8 入门说明</h2>
+                <p>了解 M3U8 的基本结构、主清单与子清单的关系，以及直播与点播在 HLS 中的差异。</p>
+                <a href="/tutorial_m3u8_basics.html">阅读教程</a>
+            </article>
+            <article class="card">
+                <h2>播放失败排障清单</h2>
+                <p>按链接可访问性、跨域、签名鉴权、编码兼容性顺序排查，大幅减少定位时间。</p>
+                <a href="/tutorial_m3u8_errors.html">阅读教程</a>
+            </article>
+            <article class="card">
+                <h2>M3U8 跨域（CORS）排障</h2>
+                <p>讲清哪些请求会被浏览器拦截、服务端如何正确放行清单与分片。</p>
+                <a href="/tutorial_m3u8_cors.html">阅读教程</a>
+            </article>
+            <article class="card">
+                <h2>直播与点播（VOD）差异</h2>
+                <p>从 EXT-X-ENDLIST、缓存策略和更新机制理解 HLS 直播行为。</p>
+                <a href="/tutorial_hls_live_vod.html">阅读教程</a>
+            </article>
+            <article class="card">
+                <h2>VLC 播放 M3U8 指南</h2>
+                <p>桌面端快速验证流地址时，如何用 VLC 打开网络流与定位错误。</p>
+                <a href="/tutorial_m3u8_vlc.html">阅读教程</a>
+            </article>
+            <article class="card">
+                <h2>自适应码率（ABR）原理</h2>
+                <p>理解主清单、多码率切换和带宽波动下的清晰度变化逻辑。</p>
+                <a href="/tutorial_hls_abr.html">阅读教程</a>
+            </article>
+        </section>
+
+        <div class="footer">
+            <div>© 2026 m3u8live.cn - 仅限个人非商用使用</div>
+            <div class="links" style="margin-top: 8px;">
+                <a href="/privacy.html">隐私政策</a>
+                <a href="/terms.html">服务条款</a>
+                <a href="/contact.html">联系我们</a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

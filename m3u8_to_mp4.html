@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M3U8 转 MP4 - 本地转换下载 | m3u8live.cn</title>
+    <meta name="description" content="M3U8 转 MP4 在线工具：浏览器本地转换，无需安装。">
+    <style>
+        :root {
+            --bg: #f2f8ff;
+            --ink: #1a1a1a;
+            --muted: #5b748f;
+            --accent: #2f79bf;
+            --card: #ffffff;
+            --border: #dbe9f7;
+            --shadow: 0 14px 40px rgba(10, 10, 10, 0.12);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            min-height: 100vh;
+            background: radial-gradient(1200px 500px at 10% -10%, #e9f4ff 0%, transparent 60%),
+                        radial-gradient(900px 420px at 95% 10%, #dcebff 0%, transparent 65%),
+                        var(--bg);
+            color: var(--ink);
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        }
+        .hd {
+            width: 100%;
+            height: 56px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(8px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .link-list {
+            max-width: 980px;
+            height: 100%;
+            margin: 0 auto;
+            padding: 0 18px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .brand {
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            margin-right: auto;
+            color: var(--ink);
+        }
+        .link-list a {
+            color: var(--ink);
+            text-decoration: none;
+            font-size: 14px;
+            padding: 6px 10px;
+            border-radius: 999px;
+        }
+        .link-list a:hover { background: #e3f0ff; }
+        .main {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 32px 16px 64px;
+        }
+        .hero h1 {
+            font-size: 36px;
+            line-height: 1.1;
+        }
+        .hero p {
+            margin-top: 10px;
+            color: var(--muted);
+        }
+        .card {
+            margin-top: 18px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: var(--shadow);
+        }
+        .form {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        .form-bottom {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .form input {
+            flex: 1;
+            height: 46px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #f4f9ff;
+            padding: 0 14px;
+            font-size: 14px;
+        }
+        .form input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(11, 59, 47, 0.12);
+        }
+        .btn {
+            height: 46px;
+            padding: 0 18px;
+            border: none;
+            border-radius: 10px;
+            background: var(--accent);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn:hover { background: #0a2d24; }
+        .btn:disabled {
+            background: #48645b;
+            cursor: not-allowed;
+        }
+        .mode-select {
+            height: 38px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0 10px;
+            background: #f4f9ff;
+        }
+        .progress {
+            margin-top: 12px;
+            width: 100%;
+            height: 10px;
+            border-radius: 999px;
+            background: #ddeeff;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .progress > div {
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #2f6f5d, #0b3b2f);
+            transition: width 0.25s ease;
+        }
+        .status {
+            margin-top: 10px;
+            min-height: 18px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+        .tips {
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+        .links a {
+            color: var(--accent);
+            margin-right: 10px;
+            text-decoration: none;
+        }
+        .links a:hover { text-decoration: underline; }
+        @media screen and (max-width: 640px) {
+            .hero h1 { font-size: 30px; }
+            .form { flex-direction: column; }
+            .form-bottom { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <header class="hd">
+        <div class="link-list">
+            <span class="brand">M3U8 Player</span>
+            <a href="/">首页</a>
+            <a href="/m3u8_to_mp4.html">M3U8转MP4</a>
+            <a href="/tutorials.html">教程</a>
+            <a href="/about.html">关于</a>
+            <a href="/help.html">帮助中心</a>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="hero">
+            <h1>M3U8 转 MP4</h1>
+            <p>粘贴 M3U8 链接后在服务端转码并下载 MP4。</p>
+        </section>
+
+        <section class="card">
+            <label for="source-url">M3U8 链接</label>
+            <div class="form">
+                <input id="source-url" type="text" value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" placeholder="请输入 M3U8 地址（如：https://xxx.m3u8）">
+                <button id="convert-btn" class="btn" type="button">开始转换</button>
+            </div>
+            <div class="form-bottom">
+                <label for="profile">转码模式</label>
+                <select id="profile" class="mode-select">
+                    <option value="fast">极速（480p，推荐）</option>
+                    <option value="balanced">兼容（较慢，画质更好）</option>
+                </select>
+            </div>
+            <div class="progress"><div id="progress-bar"></div></div>
+            <div class="status" id="status-text">待开始</div>
+            <div class="tips">
+                <div>1. 极速模式会降分辨率到 480p，明显更快。</div>
+                <div>2. 转码在服务器端完成，请耐心等待任务处理。</div>
+                <div>3. 如遇失败，请检查源链接是否可访问、是否带鉴权参数。</div>
+            </div>
+        </section>
+    </main>
+
+    <div class="main" style="padding-top: 0;">
+        <div class="footer" style="font-size: 13px; color: var(--muted);">
+            <div>© 2026 m3u8live.cn - 仅限个人非商用使用</div>
+            <div class="links" style="margin-top: 8px;">
+                <a href="/about.html">关于</a>
+                <a href="/help.html">帮助中心</a>
+                <a href="/tutorials.html">教程中心</a>
+                <a href="/privacy.html">隐私政策</a>
+                <a href="/terms.html">服务条款</a>
+                <a href="/contact.html">联系我们</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isConverting = false;
+        const sourceInput = document.getElementById('source-url');
+        const convertBtn = document.getElementById('convert-btn');
+        const profileEl = document.getElementById('profile');
+        const statusText = document.getElementById('status-text');
+        const progressBar = document.getElementById('progress-bar');
+
+        function setStatus(text, ratio) {
+            statusText.textContent = text;
+            if (typeof ratio === 'number') {
+                const val = Math.max(0, Math.min(1, ratio));
+                progressBar.style.width = `${(val * 100).toFixed(1)}%`;
+            }
+        }
+
+        function setBusy(busy) {
+            isConverting = busy;
+            convertBtn.disabled = busy;
+            convertBtn.textContent = busy ? '转换中...' : '开始转换';
+        }
+
+        function ensureM3U8(url) {
+            if (!url) return false;
+            const normalized = url.trim().toLowerCase();
+            return normalized.startsWith('http') && normalized.includes('.m3u8');
+        }
+
+        function triggerDownload(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 3000);
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function waitForJob(jobId) {
+            let pseudo = 0.2;
+            while (true) {
+                const res = await fetch(`/api/convert/${jobId}/status`, { method: 'GET' });
+                if (!res.ok) {
+                    const text = await res.text();
+                    if (res.status === 404 || (text && text.includes('任务不存在或已过期'))) {
+                        throw new Error('JOB_EXPIRED');
+                    }
+                    throw new Error(text || `状态查询失败: HTTP ${res.status}`);
+                }
+                const job = await res.json();
+                if (job.status === 'done') {
+                    setStatus('转码完成，准备下载...', 0.96);
+                    return;
+                }
+                if (job.status === 'error') {
+                    throw new Error(job.error || '转码失败');
+                }
+                pseudo = Math.min(0.9, pseudo + 0.03);
+                setStatus('服务端转码中，请稍候...', pseudo);
+                await sleep(2000);
+            }
+        }
+
+        async function convert() {
+            if (isConverting) return;
+            const sourceUrl = sourceInput.value.trim();
+            const profile = profileEl.value === 'balanced' ? 'balanced' : 'fast';
+            if (!ensureM3U8(sourceUrl)) {
+                setStatus('请输入有效的 M3U8 链接（以 .m3u8 结尾）', 0);
+                return;
+            }
+
+            try {
+                setBusy(true);
+                setStatus('正在提交后端转码任务...', 0.15);
+                const res = await fetch('/api/convert', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: sourceUrl, profile })
+                });
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error(text || `HTTP ${res.status}`);
+                }
+                const data = await res.json();
+                if (!data.jobId) throw new Error('后端未返回任务ID');
+
+                await waitForJob(data.jobId);
+                const downloadRes = await fetch(`/api/convert/${data.jobId}/download`, { method: 'GET' });
+                if (!downloadRes.ok) {
+                    const text = await downloadRes.text();
+                    if (downloadRes.status === 404 || (text && text.includes('任务不存在或已过期'))) {
+                        throw new Error('JOB_EXPIRED');
+                    }
+                    throw new Error(text || `下载失败: HTTP ${downloadRes.status}`);
+                }
+                const blob = await downloadRes.blob();
+                triggerDownload(blob, `m3u8_to_mp4_${Date.now()}.mp4`);
+                setStatus('转换完成，已开始下载', 1);
+            } catch (error) {
+                const msg = String(error && error.message ? error.message : error);
+                if (msg.includes('JOB_EXPIRED')) {
+                    setStatus('任务超时，请重新提交', 0);
+                } else if (msg.includes('Failed to fetch') || msg.includes('ERR_NETWORK_IO_SUSPENDED')) {
+                    setStatus('转换失败：网络连接中断。请保持页面前台、关闭系统休眠后重试。', 0);
+                } else {
+                    setStatus(`转换失败：${msg}`, 0);
+                }
+                console.error(error);
+            } finally {
+                setBusy(false);
+            }
+        }
+
+        convertBtn.addEventListener('click', convert);
+        sourceInput.addEventListener('click', () => sourceInput.select());
+    </script>
+</body>
+</html>

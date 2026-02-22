@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M3U8 入门说明：结构、字段与播放机制</title>
+    <meta name="description" content="M3U8 入门教程：主清单、子清单、分片、EXTINF、直播与点播差异。">
+    <style>
+        :root { --bg:#f2f8ff; --ink:#1a1a1a; --muted:#5b748f; --accent:#2f79bf; --card:#fff; --border:#dbe9f7; --shadow:0 14px 40px rgba(10,10,10,.12); }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:var(--ink); background:radial-gradient(1200px 500px at 10% -10%, #e9f4ff 0%, transparent 60%), radial-gradient(900px 420px at 95% 10%, #dcebff 0%, transparent 65%), var(--bg); }
+        .hd { height:56px; border-bottom:1px solid var(--border); background:rgba(255,255,255,.75); }
+        .link-list { max-width:900px; height:100%; margin:0 auto; padding:0 16px; display:flex; align-items:center; gap:14px; }
+        .brand { margin-right:auto; font-weight:700; }
+        .link-list a { color:var(--ink); text-decoration:none; font-size:14px; }
+        .main { max-width:900px; margin:0 auto; padding:28px 16px 64px; }
+        .article { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow); line-height:1.8; }
+        h1 { font-size:30px; margin-bottom:10px; }
+        h2 { font-size:20px; margin:18px 0 8px; }
+        p, li { color:#243648; }
+        ul { padding-left:20px; }
+        pre { background:#f4f9ff; border:1px solid var(--border); border-radius:10px; padding:12px; overflow:auto; }
+    </style>
+</head>
+<body>
+    <header class="hd">
+        <div class="link-list">
+            <span class="brand">M3U8 Player</span>
+            <a href="/">首页</a>
+            <a href="/tutorials.html">教程中心</a>
+            <a href="/help.html">帮助中心</a>
+        </div>
+    </header>
+    <main class="main">
+        <article class="article">
+            <h1>M3U8 入门说明：结构、字段与播放机制</h1>
+            <p>M3U8 是 HLS 协议使用的播放列表文本文件。播放器并不直接播放 m3u8，而是解析里面的媒体分片地址（通常是 ts 或 fmp4），按顺序拉流并拼接播放。</p>
+
+            <h2>1. 主清单与子清单</h2>
+            <p>常见场景下，一个入口 m3u8 是“主清单”，里面列出了多路码率；播放器会根据网络状况选择一个子清单继续播放。</p>
+            <pre><code>#EXTM3U
+#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=640x360
+low/index.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=2400000,RESOLUTION=1280x720
+high/index.m3u8</code></pre>
+
+            <h2>2. 子清单里的关键字段</h2>
+            <ul>
+                <li><strong>#EXTINF</strong>：后续分片时长（秒）。</li>
+                <li><strong>#EXT-X-TARGETDURATION</strong>：分片最大时长，播放器缓冲策略依赖它。</li>
+                <li><strong>#EXT-X-MEDIA-SEQUENCE</strong>：直播流起始序号，直播会持续增长。</li>
+                <li><strong>#EXT-X-ENDLIST</strong>：点播结束标记，直播通常没有。</li>
+            </ul>
+
+            <h2>3. 直播与点播差异</h2>
+            <p>点播（VOD）清单一般稳定且有 <code>ENDLIST</code>；直播清单会不断更新，播放器需要轮询拉取新分片，因此直播对网络波动更敏感。</p>
+
+            <h2>4. 为什么“能打开链接但不能播放”</h2>
+            <ul>
+                <li>跨域未放开，浏览器拦截分片请求。</li>
+                <li>签名鉴权失效，分片返回 403/401。</li>
+                <li>视频编码不兼容，例如某些浏览器无法硬解 HEVC。</li>
+            </ul>
+        </article>
+    </main>
+</body>
+</html>

@@ -20,6 +20,19 @@ https://m3u8player.org
 
 访问入口是index.html
 
+## 本地启动（含 M3U8 转 MP4 后端转码）
+
+当前仓库已增加 `server.js`，用于提供静态页面和 `/api/convert` 转码接口。
+
+1. 安装 ffmpeg（必须）
+2. 在项目根目录执行：
+
+```bash
+node server.js
+```
+
+3. 打开 `http://localhost:8080/m3u8_to_mp4.html`
+
 
 ## 视频教学
 
@@ -37,6 +50,5 @@ https://youtu.be/zSuEPMbgaNU?si=bpg3kuY8tuOfrue7
 - [m3u8 player online](https://m3u8player.org/en/)
 
 - [m3u8 to mp4](https://m3u8player.org/en/m3u8_to_mp4/)
-
 
 
