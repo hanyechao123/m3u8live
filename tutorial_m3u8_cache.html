@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M3U8 缓存与性能优化指南：更快的加载与更稳的播放</title>
+    <meta name="description" content="M3U8 缓存与性能优化：分片时长、关键帧、CDN 缓存策略与播放器体验提升。">
+    <style>
+        :root { --bg:#f2f8ff; --ink:#1a1a1a; --muted:#5b748f; --accent:#2f79bf; --card:#fff; --border:#dbe9f7; --shadow:0 14px 40px rgba(10,10,10,.12); }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:var(--ink); background:radial-gradient(1200px 500px at 10% -10%, #e9f4ff 0%, transparent 60%), radial-gradient(900px 420px at 95% 10%, #dcebff 0%, transparent 65%), var(--bg); }
+        .hd { height:56px; border-bottom:1px solid var(--border); background:rgba(255,255,255,.75); }
+        .link-list { max-width:900px; height:100%; margin:0 auto; padding:0 16px; display:flex; align-items:center; gap:14px; }
+        .brand { margin-right:auto; font-weight:700; }
+        .link-list a { color:var(--ink); text-decoration:none; font-size:14px; }
+        .main { max-width:900px; margin:0 auto; padding:28px 16px 64px; }
+        .article { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow); line-height:1.8; }
+        h1 { font-size:30px; margin-bottom:10px; }
+        h2 { font-size:20px; margin:18px 0 8px; }
+        p, li { color:#243648; }
+        ul { padding-left:20px; }
+    </style>
+</head>
+<body>
+    <header class="hd">
+        <div class="link-list">
+            <span class="brand">M3U8 Player</span>
+            <a href="/">首页</a>
+            <a href="/tutorials.html">教程中心</a>
+            <a href="/help.html">帮助中心</a>
+        </div>
+    </header>
+    <main class="main">
+        <article class="article">
+            <h1>M3U8 缓存与性能优化指南：更快的加载与更稳的播放</h1>
+            <p>很多播放卡顿并不是网络慢，而是缓存策略、分片参数或编码切片方式不合理导致。M3U8 是文本清单，TS 或 fMP4 是实际媒体分片，清单与分片的缓存策略不同，优化时要分别处理。下面的建议可以显著减少首帧等待、提升切码稳定性，并降低源站压力。</p>
+
+            <h2>1. 分片时长与关键帧对齐</h2>
+            <p>分片时长过长会导致首帧等待变长，过短又会增加请求数量。常见实践是 4-6 秒左右，并确保切片点落在关键帧上。若关键帧不对齐，播放器可能需要下载多片才能解码出第一帧，表现为“黑屏几秒”。因此切片时务必启用关键帧对齐或设置合理的 GOP。</p>
+
+            <h2>2. 清单与分片的缓存策略要分开</h2>
+            <p>点播场景下，分片可以长期缓存，清单也可以设置较长的缓存时间。直播场景下，清单需要频繁更新，通常要设置短缓存或直接不缓存；分片仍可缓存一段时间以节省带宽。建议区分路径规则，并给 m3u8 与 ts 分别设置缓存策略，避免直播清单被旧缓存“卡住”。</p>
+
+            <h2>3. CDN 回源与一致性</h2>
+            <p>如果使用 CDN，确保回源规则一致，且同一路径在不同节点不会命中不同版本的清单。直播场景可考虑设置较小的缓存 TTL 并开启回源同步，保证播放端获取到最新分片列表。点播则应尽量“预热”热点内容，避免首批用户触发多次回源。</p>
+
+            <h2>4. ABR 体验优化</h2>
+            <p>自适应码率（ABR）依赖多码率清单的完整性。不同码率的分片时长要尽量一致，编码参数要稳定，否则切码时会出现画面跳变或音画不同步。清单里最好按从低到高的带宽排序，播放器能更快选定合适码率。</p>
+
+            <h2>5. 端侧体验与预加载</h2>
+            <p>很多播放器会预拉取下一个分片以避免间断，因此服务端的分片可用性要提前保证。直播切片时间不稳定会导致播放端等待，建议让切片服务保持稳定节奏。此外可以在页面侧做小幅度预加载，例如播放前先请求一次清单与首片，提高首帧成功率。</p>
+
+            <h2>6. 常见优化清单</h2>
+            <ul>
+                <li>分片时长保持在 4-6 秒区间，关键帧对齐。</li>
+                <li>直播清单短缓存，分片适度缓存，点播可长期缓存。</li>
+                <li>CDN 节点一致性配置，避免清单版本不一致。</li>
+                <li>多码率切片时长一致，码率排序合理。</li>
+                <li>首片与首帧可用性优先保障，降低首帧失败。</li>
+            </ul>
+
+            <h2>7. 结语</h2>
+            <p>优化 M3U8 的关键在于“参数一致性”和“缓存分层”。只要分片参数稳定、缓存策略明确，播放端的表现会显著改善。对有一定规模的业务来说，建议建立一套固定的切片规范与缓存模板，用配置驱动而不是临时调整，这样更容易持续保持播放稳定。</p>
+        </article>
+    </main>
+</body>
+</html>

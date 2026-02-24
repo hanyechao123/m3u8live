@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用 FFmpeg 快速检测与转码 M3U8：定位问题与生成清单</title>
+    <meta name="description" content="FFmpeg 检测与转码 M3U8：探测流信息、生成 HLS 清单、排查编码问题。">
+    <style>
+        :root { --bg:#f2f8ff; --ink:#1a1a1a; --muted:#5b748f; --accent:#2f79bf; --card:#fff; --border:#dbe9f7; --shadow:0 14px 40px rgba(10,10,10,.12); }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:var(--ink); background:radial-gradient(1200px 500px at 10% -10%, #e9f4ff 0%, transparent 60%), radial-gradient(900px 420px at 95% 10%, #dcebff 0%, transparent 65%), var(--bg); }
+        .hd { height:56px; border-bottom:1px solid var(--border); background:rgba(255,255,255,.75); }
+        .link-list { max-width:900px; height:100%; margin:0 auto; padding:0 16px; display:flex; align-items:center; gap:14px; }
+        .brand { margin-right:auto; font-weight:700; }
+        .link-list a { color:var(--ink); text-decoration:none; font-size:14px; }
+        .main { max-width:900px; margin:0 auto; padding:28px 16px 64px; }
+        .article { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow); line-height:1.8; }
+        h1 { font-size:30px; margin-bottom:10px; }
+        h2 { font-size:20px; margin:18px 0 8px; }
+        p, li { color:#243648; }
+        ul { padding-left:20px; }
+        pre { background:#f4f9ff; border:1px solid var(--border); border-radius:10px; padding:12px; overflow:auto; }
+    </style>
+</head>
+<body>
+    <header class="hd">
+        <div class="link-list">
+            <span class="brand">M3U8 Player</span>
+            <a href="/">首页</a>
+            <a href="/tutorials.html">教程中心</a>
+            <a href="/help.html">帮助中心</a>
+        </div>
+    </header>
+    <main class="main">
+        <article class="article">
+            <h1>用 FFmpeg 快速检测与转码 M3U8：定位问题与生成清单</h1>
+            <p>当播放失败或画面异常时，FFmpeg 是最实用的排障工具之一。它可以直接读取 m3u8，输出流的编码信息、音视频参数以及是否存在错误分片。对开发者来说，掌握几条常用命令，就能快速判断问题出在源流、编码还是清单结构。</p>
+
+            <h2>1. 快速探测清单与流信息</h2>
+            <p>先使用探测命令查看编码、分辨率与时长等信息，判断是否为浏览器不支持的编码格式，或者音频缺失。探测结果能帮助你确定是编码问题还是鉴权、跨域问题。</p>
+            <pre><code>ffprobe -v error -show_format -show_streams "https://example.com/live/index.m3u8"</code></pre>
+
+            <h2>2. 验证分片是否可读</h2>
+            <p>当 m3u8 可访问但播放仍失败时，通常是分片访问失败或内容损坏。可以让 FFmpeg 读取一小段内容，看看是否能顺利解码，如果大量报错说明分片不可读、签名无效或编码异常。</p>
+            <pre><code>ffmpeg -v warning -i "https://example.com/live/index.m3u8" -t 10 -f null -</code></pre>
+
+            <h2>3. 将已有视频转成 HLS（M3U8）</h2>
+            <p>如果你需要生成标准的 HLS 文件，可以用 FFmpeg 把 MP4 转为 m3u8 清单与 ts 分片。关键是设置合理的切片时长、GOP 和关键帧间隔，确保播放器能稳定解码。下方示例会生成一个包含分片和清单的输出目录。</p>
+            <pre><code>ffmpeg -i input.mp4 -c:v libx264 -c:a aac -hls_time 6 -hls_playlist_type vod \
+-hls_segment_filename "out/seg-%03d.ts" out/index.m3u8</code></pre>
+
+            <h2>4. 直播场景的常见排查点</h2>
+            <ul>
+                <li>清单更新频率是否稳定，是否存在长时间不更新。</li>
+                <li>分片是否按序号连续生成，是否出现跳号或重复。</li>
+                <li>音视频时钟是否漂移，导致播放器不同步。</li>
+                <li>编码是否为浏览器支持的 H.264/AAC。</li>
+            </ul>
+
+            <h2>5. 诊断结果如何落地</h2>
+            <p>如果探测结果显示编码不兼容，应调整转码参数或使用更通用的编码方案。如果分片请求频繁失败，需先检查鉴权、CORS 与 CDN 缓存命中策略。很多问题并不是播放器本身导致，而是源站在切片、密钥或缓存策略上的问题。用 FFmpeg 先确定“流是否可读”，再回到服务端逐项排查，会显著缩短定位时间。</p>
+
+            <h2>6. 实战建议</h2>
+            <p>建议把 FFmpeg 命令整理成脚本或排障清单，在测试环境先跑通，确认输出稳定后再上线。对于需要持续维护的直播业务，最好建立一个定时探测任务，定期验证 m3u8 是否可读、分片是否连续。这样可以在用户反馈之前提前发现问题，减少损失。</p>
+        </article>
+    </main>
+</body>
+</html>

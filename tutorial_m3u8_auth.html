@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M3U8 鉴权与防盗链实战：签名、Token 与密钥管理</title>
+    <meta name="description" content="M3U8 鉴权与防盗链实战：URL 签名、短期 Token、Referer/Origin、Cookie 鉴权与密钥轮换。">
+    <style>
+        :root { --bg:#f2f8ff; --ink:#1a1a1a; --muted:#5b748f; --accent:#2f79bf; --card:#fff; --border:#dbe9f7; --shadow:0 14px 40px rgba(10,10,10,.12); }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:var(--ink); background:radial-gradient(1200px 500px at 10% -10%, #e9f4ff 0%, transparent 60%), radial-gradient(900px 420px at 95% 10%, #dcebff 0%, transparent 65%), var(--bg); }
+        .hd { height:56px; border-bottom:1px solid var(--border); background:rgba(255,255,255,.75); }
+        .link-list { max-width:900px; height:100%; margin:0 auto; padding:0 16px; display:flex; align-items:center; gap:14px; }
+        .brand { margin-right:auto; font-weight:700; }
+        .link-list a { color:var(--ink); text-decoration:none; font-size:14px; }
+        .main { max-width:900px; margin:0 auto; padding:28px 16px 64px; }
+        .article { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow); line-height:1.8; }
+        h1 { font-size:30px; margin-bottom:10px; }
+        h2 { font-size:20px; margin:18px 0 8px; }
+        p, li { color:#243648; }
+        ul { padding-left:20px; }
+        pre { background:#f4f9ff; border:1px solid var(--border); border-radius:10px; padding:12px; overflow:auto; }
+    </style>
+</head>
+<body>
+    <header class="hd">
+        <div class="link-list">
+            <span class="brand">M3U8 Player</span>
+            <a href="/">首页</a>
+            <a href="/tutorials.html">教程中心</a>
+            <a href="/help.html">帮助中心</a>
+        </div>
+    </header>
+    <main class="main">
+        <article class="article">
+            <h1>M3U8 鉴权与防盗链实战：签名、Token 与密钥管理</h1>
+            <p>M3U8 本质是可直接访问的文本清单，如果没有鉴权，清单和分片链接很容易被外部复制、转发与二次分发。一个可用的防盗链方案要覆盖两个层面：清单层面（m3u8）与分片层面（ts 或 fmp4）。只保护清单会导致分片被直接盗链，只保护分片又会导致播放器无法顺利加载清单，两者要配合设计。</p>
+
+            <h2>1. URL 签名与短期 Token</h2>
+            <p>最常见的方案是为 m3u8 与分片 URL 加签名参数，签名通常包含路径、过期时间、随机盐等，再使用服务端私钥或密钥计算哈希。签名有效期建议短一些（例如几分钟），这样即使链接泄露也会很快失效。短期 Token 的优势是兼容性强，无需在播放器里写复杂逻辑，但需要服务器、CDN 或鉴权网关参与验证。</p>
+            <pre><code>/live/abc/index.m3u8?exp=1730000000&token=xxxx
+/live/abc/seg-001.ts?exp=1730000000&token=yyyy</code></pre>
+
+            <h2>2. Referer / Origin 与 IP 限制</h2>
+            <p>基于 Referer 或 Origin 的限制部署简单，适合前期快速防护，但容易被伪造或在某些客户端里缺失，因此它更像是“第二道门”。如果业务场景允许，结合 IP 限制可以降低分享传播的效率，但也要注意移动网络和代理导致 IP 变化过快的问题，避免误伤合法用户。</p>
+
+            <h2>3. Cookie 或 Header 鉴权</h2>
+            <p>当你需要更强的绑定关系时，可以通过 Cookie 或自定义 Header 携带 Token。这样可以把播放权限与登录态绑定，适合付费内容或会员专区。但要注意浏览器跨域请求的限制，CORS 配置要放行必要的 Header，并确保清单与分片都能带上同样的鉴权信息。</p>
+
+            <h2>4. AES-128 与密钥轮换</h2>
+            <p>HLS 支持 AES-128 加密，清单中会引用密钥地址。密钥本身也需要鉴权保护，否则加密意义不大。建议设置密钥短期有效，并结合“密钥轮换”，即一段时间或一定片数后更换密钥。这样即便密钥被截获，影响范围也会被限制。</p>
+
+            <h2>5. 常见踩坑与排查思路</h2>
+            <ul>
+                <li>只对 m3u8 做鉴权，分片未做鉴权，导致分片被直接访问。</li>
+                <li>签名过期时间太短，网络稍慢就会触发 403，播放器频繁重试。</li>
+                <li>鉴权网关只校验清单，不校验分片，或只校验第一层子清单。</li>
+                <li>CORS 未放行必要的 Header，导致鉴权信息无法随请求发送。</li>
+                <li>密钥地址没有鉴权，导致加密形同虚设。</li>
+            </ul>
+
+            <h2>6. 兼顾体验与安全的建议</h2>
+            <p>最佳实践是“短期签名 + 合理缓存 + 失败重试策略”。让签名有效期略长于平均播放时长的缓冲窗口，同时为播放器预留重试空间。对直播场景，建议给 m3u8 和分片分别设置不同的过期策略，直播清单更短、分片略长，以避免频繁更新造成的鉴权风暴。只要策略清晰、验证层统一，既能保证安全，也能让播放体验稳定。</p>
+        </article>
+    </main>
+</body>
+</html>
