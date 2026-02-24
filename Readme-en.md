@@ -1,16 +1,16 @@
 Based on html + tencent sdk development of m3u8 online player, to achieve mp4, m3u8/hls format video online playback
 
-[English version](https://github.com/geeeeeeeek/m3u8player/blob/main/README-en.md)
+[English version](https://www.m3u8live.cn/Readme-en.md)
 
 
 ## Preview
 
-https://m3u8player.org/en
+https://www.m3u8live.cn/en
 
 
 ## Deployment steps
 
-1.Apply for the licenceUrl of cloud broadcasting SDK, the application address is https://console.cloud.tencent.com/vcube/web?tab=player
+1.Apply for the licenceUrl of cloud broadcasting SDK, the application address is https://www.m3u8live.cn/
 
 2.Fill the licenseUrl of the application into the licenseUrl of the script.
 
@@ -20,8 +20,7 @@ https://m3u8player.org/en
 
 ## Reference
 
-- [m3u8player](https://m3u8player-cm4.pages.dev/)
+- [m3u8player](https://www.m3u8live.cn/)
 
-- [vercel-alpha](https://m3u8player-alpha.vercel.app/)
-
+- [vercel-alpha](https://www.m3u8live.cn/)
 
