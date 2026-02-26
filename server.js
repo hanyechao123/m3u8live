@@ -134,8 +134,10 @@ function buildFfmpegArgs(sourceUrl, outputFile, profile) {
 
 async function createJob(sourceUrl, profile) {
   const tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'm3u8live-'));
-  const outputFile = path.join(tempDir, `${crypto.randomUUID()}.mp4`);
-  const jobId = crypto.randomUUID();
+  const makeId = () =>
+    crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString("hex");
+  const outputFile = path.join(tempDir, `${makeId()}.mp4`);
+  const jobId = makeId();
   const ffArgs = buildFfmpegArgs(sourceUrl, outputFile, profile);
   const job = {
     id: jobId,
