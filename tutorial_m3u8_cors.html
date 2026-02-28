@@ -18,6 +18,9 @@
         .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; box-shadow:var(--shadow); line-height:1.8; }
         h1 { font-size:28px; margin-bottom:10px; }
         h2 { font-size:18px; margin:14px 0 6px; }
+        .footer { max-width:900px; margin:0 auto; padding:0 16px 24px; font-size:13px; color:#5b748f; }
+        .footer-links { margin-top:8px; display:flex; gap:14px; flex-wrap:wrap; }
+        .footer a { color:#2f79bf; text-decoration:none; }
         pre { background:#f4f9ff; border:1px solid var(--border); border-radius:10px; padding:12px; overflow:auto; }
     </style>
 </head>
@@ -33,18 +36,32 @@
 <main class="main">
     <article class="card">
         <h1>M3U8 跨域（CORS）排障</h1>
-        <p>浏览器播放 HLS 时，会分别请求 m3u8 清单和 ts/fmp4 分片。任意一个请求跨域未放行，都可能导致播放失败。</p>
-        <h2>常见现象</h2>
-        <p>控制台出现 CORS 报错，或 Network 面板中分片请求状态正常但被浏览器拦截。</p>
-        <h2>排查要点</h2>
-        <p>1) 清单地址和分片地址是否同源；2) 是否返回了跨域响应头；3) CDN 是否覆盖了源站头部。</p>
-        <h2>Nginx 示例</h2>
+        <p>浏览器播放 HLS 时，会分别请求 m3u8 清单和 ts/fmp4 分片。任意一个请求跨域未放行，都可能导致播放失败。很多人误以为“主清单能打开就没问题”，实际上播放器后续还会继续请求子清单、分片、密钥文件，任何一步被浏览器拦截都会表现为播放失败。CORS 问题的核心不是网络不可达，而是浏览器安全策略拒绝前端读取跨域响应。</p>
+
+        <h2>一、典型现象与误区</h2>
+        <p>最常见现象是控制台出现跨域错误，或 Network 里请求状态看起来是 200，但播放器仍报错。另一个高频误区是只给 m3u8 加跨域头，没有给 ts/fmp4 或 key 文件加同样策略，导致“首片可播、后续失败”。如果你启用了自定义请求头、Cookie 或 Authorization，还可能触发预检请求（OPTIONS），这时服务端必须正确响应预检，否则正式请求不会发送。</p>
+
+        <h2>二、排查顺序（建议固定）</h2>
+        <p>先确认清单和分片是否同源，不同源就必须统一跨域策略。再检查响应头是否完整返回，尤其是 <code>Access-Control-Allow-Origin</code>、<code>Access-Control-Allow-Methods</code>、<code>Access-Control-Allow-Headers</code>。如果前端需要带凭证，不能使用通配符来源，必须返回明确域名并带 <code>Access-Control-Allow-Credentials: true</code>。第三步检查 CDN 是否覆盖了源站响应头，很多问题出在边缘节点模板没有同步更新。</p>
+
+        <h2>三、Nginx 基础示例</h2>
         <pre><code>location ~* \.(m3u8|ts)$ {
   add_header Access-Control-Allow-Origin * always;
   add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
   add_header Access-Control-Allow-Headers "*" always;
 }</code></pre>
+
+        <h2>四、生产环境建议</h2>
+        <p>生产环境不建议长期使用全放开策略，最好按业务域名白名单返回来源。若涉及鉴权，清单、分片、密钥三类资源应使用一致的跨域与鉴权组合，避免规则分裂。部署完成后，务必在浏览器开发者工具中抽查主清单、子清单、分片、密钥四类请求的响应头。最后把 CORS 校验纳入上线前检查项，这样能在发布阶段就拦截大量“上线后才发现无法播放”的问题。</p>
     </article>
 </main>
+<footer class="footer">
+    <div>© 2026 m3u8live.cn - 仅限个人非商用使用</div>
+    <div class="footer-links">
+        <a href="/privacy.html">隐私政策</a>
+        <a href="/terms.html">服务条款</a>
+        <a href="/contact.html">联系我们</a>
+    </div>
+</footer>
 </body>
 </html>

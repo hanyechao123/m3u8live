@@ -18,6 +18,9 @@
         .article { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow); line-height:1.8; }
         h1 { font-size:30px; margin-bottom:10px; }
         h2 { font-size:20px; margin:18px 0 8px; }
+        .footer { max-width:900px; margin:0 auto; padding:0 16px 24px; font-size:13px; color:#5b748f; }
+        .footer-links { margin-top:8px; display:flex; gap:14px; flex-wrap:wrap; }
+        .footer a { color:#2f79bf; text-decoration:none; }
         p, li { color:#243648; }
         ul { padding-left:20px; }
         pre { background:#f4f9ff; border:1px solid var(--border); border-radius:10px; padding:12px; overflow:auto; }
@@ -64,5 +67,13 @@
             <p>最佳实践是“短期签名 + 合理缓存 + 失败重试策略”。让签名有效期略长于平均播放时长的缓冲窗口，同时为播放器预留重试空间。对直播场景，建议给 m3u8 和分片分别设置不同的过期策略，直播清单更短、分片略长，以避免频繁更新造成的鉴权风暴。只要策略清晰、验证层统一，既能保证安全，也能让播放体验稳定。</p>
         </article>
     </main>
+<footer class="footer">
+    <div>© 2026 m3u8live.cn - 仅限个人非商用使用</div>
+    <div class="footer-links">
+        <a href="/privacy.html">隐私政策</a>
+        <a href="/terms.html">服务条款</a>
+        <a href="/contact.html">联系我们</a>
+    </div>
+</footer>
 </body>
 </html>

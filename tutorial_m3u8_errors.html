@@ -18,6 +18,9 @@
         .article { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow); line-height:1.8; }
         h1 { font-size:30px; margin-bottom:10px; }
         h2 { font-size:20px; margin:18px 0 8px; }
+        .footer { max-width:900px; margin:0 auto; padding:0 16px 24px; font-size:13px; color:#5b748f; }
+        .footer-links { margin-top:8px; display:flex; gap:14px; flex-wrap:wrap; }
+        .footer a { color:#2f79bf; text-decoration:none; }
         ul { padding-left:20px; }
         li { margin-bottom:6px; color:#243648; }
     </style>
@@ -34,19 +37,21 @@
     <main class="main">
         <article class="article">
             <h1>M3U8 播放失败排障：从链接到编码的定位流程</h1>
-            <p>排障建议按照固定顺序做：先看链接可访问性，再看跨域和鉴权，最后看编码兼容。顺序错了会浪费大量时间。</p>
+            <p>排障建议按照固定顺序做：先看链接可访问性，再看跨域和鉴权，最后看编码兼容。顺序错了会浪费大量时间。很多团队一遇到播放失败就先怀疑播放器，结果在前端调了半天才发现是签名过期或 CDN 缓存旧清单。把问题拆成“能否拿到资源”和“拿到后能否解码”两层，定位会更快，也更容易复盘沉淀为团队流程。</p>
 
             <h2>步骤 1：确认链接有效</h2>
             <ul>
                 <li>直接在浏览器打开 m3u8，至少能返回文本内容。</li>
                 <li>检查分片 URL 是否可访问，避免 m3u8 可用但 ts 全部 403。</li>
                 <li>签名参数有时效，过期后需要重新生成 URL。</li>
+                <li>若是主清单，继续抽查一个子清单，避免只验证了入口地址。</li>
             </ul>
 
             <h2>步骤 2：检查 CORS</h2>
             <ul>
                 <li>浏览器开发者工具看 Network/Console，是否存在 CORS 报错。</li>
                 <li>服务端至少要允许来源和必要请求头，分片与清单都要放行。</li>
+                <li>如果带 Cookie 或 Authorization，确认预检 OPTIONS 已正确处理。</li>
             </ul>
 
             <h2>步骤 3：区分“解码失败”与“网络失败”</h2>
@@ -54,6 +59,7 @@
                 <li>有声音没画面：常见是编码兼容问题（例如 HEVC）。</li>
                 <li>频繁缓冲：优先怀疑网络波动和分片体积过大。</li>
                 <li>开头能播后面中断：直播源更新异常或 token 过期。</li>
+                <li>不同浏览器表现不一致：重点看编码与容器兼容，而非链路可达性。</li>
             </ul>
 
             <h2>步骤 4：需要转码时怎么做</h2>
@@ -62,7 +68,26 @@
                 <li>先用低分辨率快速验证，再做高质量导出。</li>
                 <li>生产环境建议做任务队列，避免多个 ffmpeg 并发打满 CPU。</li>
             </ul>
+
+            <h2>步骤 5：日志与监控闭环</h2>
+            <ul>
+                <li>记录失败时间点、请求 URL、状态码和播放器错误码，便于复现。</li>
+                <li>对 4xx、5xx、超时、重试次数建立监控，看是否在同一时段突增。</li>
+                <li>直播业务建议监控清单更新时间和最新分片生成延迟，提前发现断流风险。</li>
+                <li>把高频故障归类成固定模板，形成团队通用排障清单。</li>
+            </ul>
+
+            <h2>结论：用固定流程替代经验猜测</h2>
+            <p>M3U8 问题看起来复杂，但只要按“链接可达 -> 跨域鉴权 -> 解码兼容 -> 转码与监控”这条路径排查，绝大多数故障都能在较短时间内定位。对线上系统来说，真正重要的不是某次救火成功，而是把可复用流程沉淀下来，让每个人都能按同一标准快速判断和处理。</p>
         </article>
     </main>
+<footer class="footer">
+    <div>© 2026 m3u8live.cn - 仅限个人非商用使用</div>
+    <div class="footer-links">
+        <a href="/privacy.html">隐私政策</a>
+        <a href="/terms.html">服务条款</a>
+        <a href="/contact.html">联系我们</a>
+    </div>
+</footer>
 </body>
 </html>
