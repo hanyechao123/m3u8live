@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
-    <link rel="icon" href="/images/logo.ico" type="image/x-icon">
+    <link rel="icon" href="/images/favicon-blue.svg" type="image/svg+xml">
     <title>M3U8 在线播放器 - 轻量免费 | m3u8live.cn</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,20 +17,22 @@
 
     <style>
         :root {
-            --bg: #f2f8ff;
+            --bg: #eef6ff;
             --ink: #1a1a1a;
             --muted: #5b748f;
-            --accent: #2f79bf;
+            --accent: #2f7fde;
+            --accent-deep: #1f5fb4;
             --card: #ffffff;
             --border: #dbe9f7;
-            --shadow: 0 14px 40px rgba(10, 10, 10, 0.12);
+            --shadow: 0 18px 44px rgba(17, 41, 74, 0.12);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
             width: 100%;
             min-height: 100vh;
-            background: radial-gradient(1200px 500px at 10% -10%, #e9f4ff 0%, transparent 60%),
-                        radial-gradient(900px 420px at 95% 10%, #dcebff 0%, transparent 65%),
+            background: radial-gradient(1240px 540px at 8% -12%, #d4e8ff 0%, transparent 61%),
+                        radial-gradient(940px 420px at 94% 9%, #d8efff 0%, transparent 66%),
+                        radial-gradient(800px 360px at 50% 100%, #eaf4ff 0%, transparent 68%),
                         var(--bg);
             color: var(--ink);
             font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
@@ -102,12 +104,13 @@
             color: var(--muted);
         }
         .card {
-            background: var(--card);
+            background: rgba(255, 255, 255, 0.82);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 18px;
+            border-radius: 18px;
+            padding: 20px;
             box-shadow: var(--shadow);
             margin-bottom: 18px;
+            backdrop-filter: blur(10px);
         }
         .form {
             display: flex;
@@ -117,31 +120,44 @@
         }
         .form input {
             flex: 1;
-            height: 46px;
-            border: 1px solid var(--border);
-            padding: 0 14px;
-            border-radius: 10px;
-            background: #f4f9ff;
-            font-size: 14px;
+            height: 56px;
+            border: 1px solid #bdd8f8;
+            padding: 0 18px;
+            border-radius: 18px;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(239, 247, 255, 0.92) 100%);
+            font-size: 15px;
+            box-shadow: inset 0 1px 2px rgba(18, 50, 90, 0.08), 0 8px 20px rgba(64, 127, 201, 0.14);
         }
         .form input:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(11, 59, 47, 0.12);
+            box-shadow:
+                0 0 0 4px rgba(47, 127, 222, 0.2),
+                0 12px 26px rgba(55, 121, 202, 0.2),
+                inset 0 1px 2px rgba(20, 53, 96, 0.08);
+            background: #ffffff;
         }
         .play-btn {
-            height: 46px;
-            padding: 0 18px;
+            height: 50px;
+            padding: 0 20px;
             border: none;
-            border-radius: 10px;
-            background: var(--accent);
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
             color: #fff;
             font-weight: 600;
             cursor: pointer;
+            box-shadow: 0 10px 20px rgba(31, 95, 180, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
         }
-        .play-btn:hover { background: #0a2d24; }
+        .play-btn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.03);
+            box-shadow: 0 12px 24px rgba(31, 95, 180, 0.32);
+        }
         .play-btn:disabled {
-            background: #48645b;
+            background: #88acd9;
+            box-shadow: none;
             cursor: not-allowed;
         }
         .ghost-btn {
@@ -243,6 +259,10 @@
             font-size: 13px;
             display: none;
         }
+        .what-copy p {
+            margin-top: 10px;
+            line-height: 1.7;
+        }
 
         /* 响应式适配 */
         @media screen and (max-width: 820px) {
@@ -255,6 +275,7 @@
             .convert-actions { flex-direction: column; }
         }
     </style>
+    <link rel="stylesheet" href="/styles/site-theme.css">
 </head>
 <body>
     <header class="hd">
@@ -308,16 +329,16 @@
             </div>
         </div>
 
-        <div class="card" id="m3u8-to-mp4">
+        <!-- <div class="card" id="m3u8-to-mp4">
             <div class="section-title" data-i18n="convert_title">M3U8 转 MP4</div>
             <p data-i18n="convert_desc">已提供独立转换页，点击下方按钮进入并开始转换。</p>
             <div style="margin-top: 10px;">
                 <a class="play-btn" href="/m3u8_to_mp4.html" style="display: inline-flex; align-items: center;" data-i18n="convert_go_btn">前往转换页面</a>
             </div>
-        </div>
+        </div> -->
 
         <div class="card">
-            <div class="section-title" data-i18n="tutorials_title">精选教程与指南</div>
+            <!-- <div class="section-title" data-i18n="tutorials_title">精选教程与指南</div>
             <div class="meta-grid">
                 <div class="meta-item">
                     <h3><a href="/tutorial_m3u8_basics.html" data-i18n="tutorial1_title">M3U8 入门说明</a></h3>
@@ -331,7 +352,7 @@
                     <h3><a href="/tutorial_m3u8_cors.html" data-i18n="tutorial3_title">CORS 跨域排障</a></h3>
                     <p data-i18n="tutorial3_desc">讲清清单和分片请求为何被拦截，以及如何正确放行。</p>
                 </div>
-            </div>
+            </div> -->
 
             <div class="section-title" data-i18n="embed_title">嵌入到你的网站</div>
             <div class="embed" data-i18n-code="embed_code">
@@ -339,8 +360,12 @@
             </div>
 
             <div class="section-title" data-i18n="what_title">什么是 M3U8？</div>
-            <p data-i18n="what_p1">M3U8 是一种 UTF-8 编码的播放列表文件格式，常用于 HLS 流媒体传输，广泛应用于直播、视频点播等场景。</p>
-            <p data-i18n="what_p2">它本身不是视频文件，而是记录了视频分片（TS 文件）的地址，播放器通过解析该文件实现视频播放。</p>
+            <div class="what-copy">
+                <p data-i18n="what_p1">M3U8 是一种 UTF-8 编码的播放列表文件格式，常用于 HLS 流媒体传输，广泛应用于直播、视频点播等场景。</p>
+                <p data-i18n="what_p2">它本身不是视频文件，而是记录了视频分片（TS 文件）的地址，播放器通过解析该文件实现视频播放。</p>
+                <p data-i18n="what_p3">一个完整的视频通常由很多小分片组成，M3U8 文件会按顺序列出这些分片地址。播放器按列表逐段请求并拼接播放，因此在弱网环境下也能更平滑地加载。</p>
+                <p data-i18n="what_p4">当你遇到“无法播放”时，通常与链接失效、跨域限制、鉴权过期或编码不兼容有关。建议优先检查 M3U8 是否可访问、分片地址是否返回 200，以及浏览器控制台报错信息。</p>
+            </div>
         </div>
 
         <div class="footer">
@@ -421,6 +446,8 @@
                 what_title: '什么是 M3U8？',
                 what_p1: 'M3U8 是一种 UTF-8 编码的播放列表文件格式，常用于 HLS 流媒体传输，广泛应用于直播、视频点播等场景。',
                 what_p2: '它本身不是视频文件，而是记录了视频分片（TS 文件）的地址，播放器通过解析该文件实现视频播放。',
+                what_p3: '一个完整的视频通常由很多小分片组成，M3U8 文件会按顺序列出这些分片地址。播放器按列表逐段请求并拼接播放，因此在弱网环境下也能更平滑地加载。',
+                what_p4: '当你遇到“无法播放”时，通常与链接失效、跨域限制、鉴权过期或编码不兼容有关。建议优先检查 M3U8 是否可访问、分片地址是否返回 200，以及浏览器控制台报错信息。',
                 footer_copy: '© 2026 m3u8live.cn - 仅限个人非商用使用',
                 footer_about: '关于我们',
                 footer_help: '帮助中心',
@@ -485,6 +512,8 @@
                 what_title: 'What is M3U8?',
                 what_p1: 'M3U8 is a UTF-8 playlist format used for HLS streaming, widely used in live and on-demand video.',
                 what_p2: 'It is not a video file itself; it contains segment (TS) URLs that the player parses to play video.',
+                what_p3: 'A full stream is usually split into many small segments. The M3U8 file lists these segment URLs in order, and the player requests them one by one for smoother playback.',
+                what_p4: 'If playback fails, common causes are expired links, CORS restrictions, auth/token expiration, or codec mismatch. Check playlist accessibility, segment HTTP status, and console errors first.',
                 footer_copy: '© 2026 m3u8live.cn - Personal use only',
                 footer_about: 'About us',
                 footer_help: 'Help Center',
@@ -549,6 +578,8 @@
                 what_title: 'M3U8 とは？',
                 what_p1: 'M3U8 は HLS で使われる UTF-8 プレイリスト形式で、ライブやVODで広く利用されます。',
                 what_p2: '動画ファイルではなく、セグメント（TS）へのURLを記録し、解析して再生します。',
+                what_p3: '通常、動画は複数の小さなセグメントに分割され、M3U8 はそのURLを順番に並べます。プレーヤーは順に取得して再生するため、回線が不安定でも比較的スムーズです。',
+                what_p4: '再生できない場合は、リンク切れ、CORS 制限、認証期限切れ、コーデック非対応が主な原因です。まずは M3U8 の到達性とセグメントのHTTPステータスを確認してください。',
                 footer_copy: '© 2026 m3u8live.cn - 個人利用のみ',
                 footer_about: '私たちについて',
                 footer_help: 'ヘルプセンター',
@@ -613,6 +644,8 @@
                 what_title: 'Что такое M3U8?',
                 what_p1: 'M3U8 — это формат плейлиста UTF‑8 для HLS, широко используемый в прямых эфирах и VOD.',
                 what_p2: 'Это не видеофайл, а список сегментов (TS) для воспроизведения.',
+                what_p3: 'Обычно поток делится на множество небольших сегментов, а M3U8 перечисляет их URL по порядку. Плеер загружает их последовательно, что помогает обеспечить более плавное воспроизведение.',
+                what_p4: 'Если видео не воспроизводится, частые причины: недействительная ссылка, ограничения CORS, истекшая авторизация или несовместимый кодек. Сначала проверьте доступность M3U8, ответы сегментов и ошибки в консоли.',
                 footer_copy: '© 2026 m3u8live.cn - Только для личного использования',
                 footer_about: 'О нас',
                 footer_help: 'Центр помощи',
