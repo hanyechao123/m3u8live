@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="/images/favicon-blue.svg" type="image/svg+xml">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M3U8 加密与密钥管理指南：从 AES-128 到线上轮换</title>
+    <meta name="description" content="M3U8 加密教程：EXT-X-KEY、密钥下发、鉴权、轮换策略与常见故障排查。">
+    <style>
+        :root { --bg:#f2f8ff; --ink:#1a1a1a; --muted:#5b748f; --accent:#2f79bf; --card:#fff; --border:#dbe9f7; --shadow:0 14px 40px rgba(10,10,10,.12); }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:var(--ink); background:radial-gradient(1200px 500px at 10% -10%, #e9f4ff 0%, transparent 60%), radial-gradient(900px 420px at 95% 10%, #dcebff 0%, transparent 65%), var(--bg); }
+        .hd { height:56px; border-bottom:1px solid var(--border); background:rgba(255,255,255,.75); }
+        .link-list { max-width:900px; height:100%; margin:0 auto; padding:0 16px; display:flex; align-items:center; gap:14px; }
+        .brand { margin-right:auto; font-weight:700; }
+        .link-list a { color:var(--ink); text-decoration:none; font-size:14px; }
+        .main { max-width:900px; margin:0 auto; padding:28px 16px 64px; }
+        .article { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow); line-height:1.8; }
+        h1 { font-size:30px; margin-bottom:10px; }
+        h2 { font-size:20px; margin:18px 0 8px; }
+        .footer { max-width:900px; margin:0 auto; padding:0 16px 24px; font-size:13px; color:#5b748f; }
+        .footer-links { margin-top:8px; display:flex; gap:14px; flex-wrap:wrap; }
+        .footer a { color:#2f79bf; text-decoration:none; }
+        p, li { color:#243648; }
+        ul { padding-left:20px; }
+        pre { background:#f4f9ff; border:1px solid var(--border); border-radius:10px; padding:12px; overflow:auto; }
+    </style>
+    <link rel="stylesheet" href="/styles/site-theme.css">
+</head>
+<body>
+    <header class="hd">
+        <div class="link-list">
+            <span class="brand">M3U8 Player</span>
+            <a href="/">首页</a>
+            <a href="/tutorials.html">教程中心</a>
+            <a href="/help.html">帮助中心</a>
+        </div>
+    </header>
+    <main class="main">
+        <article class="article">
+            <h1>M3U8 加密与密钥管理指南：从 AES-128 到线上轮换</h1>
+            <p>很多团队在做防盗链时只关注 URL 签名，忽略了媒体内容本身的保护。实际上，签名解决的是“谁能拿到地址”，加密解决的是“拿到文件后是否可直接使用”。在 HLS 场景中，常见方案是通过 <code>#EXT-X-KEY</code> 声明分片解密方式，播放器在拉取分片前先请求密钥，再完成解密播放。要把这件事做稳，核心不是单条配置，而是密钥下发、鉴权、缓存和轮换的一致性设计。</p>
+
+            <h2>1. 理解 EXT-X-KEY 的作用</h2>
+            <p>媒体清单里出现 <code>#EXT-X-KEY</code> 时，表示后续分片需要按指定算法解密。最常见是 <code>METHOD=AES-128</code>，并通过 URI 指向密钥接口。播放器读取到该字段后，会先访问密钥地址，再下载分片。若密钥接口返回异常、跨域不正确或权限不足，即使分片本身可访问也无法播放。也因此，加密问题排查必须同时看清单请求、密钥请求和分片请求三个链路。</p>
+            <pre><code>#EXT-X-KEY:METHOD=AES-128,URI="https://example.com/key?id=abc",IV=0x00000000000000000000000000000001</code></pre>
+
+            <h2>2. 密钥接口必须做鉴权</h2>
+            <p>线上事故里最常见的问题不是“密钥太难拿”，而是“密钥被任何人直接下载”。如果密钥地址是公开静态文件，加密基本失去意义。正确做法是把密钥放在受控接口后，由服务端校验 token、来源、过期时间和业务权限，再返回短时有效内容。对于高价值内容，可以把密钥请求与会话绑定，发现异常访问频率时立即吊销，降低泄露后的可利用窗口。</p>
+
+            <h2>3. 轮换策略决定安全上限</h2>
+            <p>密钥长期不变会大幅降低防护效果。建议按时间窗口或分片序号进行轮换，例如每 5 分钟或每 N 个分片切换一次，并在清单里更新新的 KEY 声明。轮换时要兼顾回看和缓冲中的旧分片：旧密钥应保留短暂可用期，否则用户在切换边界容易解密失败。工程上可以维护“当前密钥 + 前一版本密钥”的双缓冲窗口，平衡安全与可用性。</p>
+
+            <h2>4. CDN 与缓存不要误伤密钥</h2>
+            <p>密钥接口通常不应被长时间缓存，尤其不能在公共缓存中被跨用户复用。若 CDN 错误缓存了密钥响应，可能导致权限绕过或错误用户拿到他人会话密钥。建议对密钥响应设置严格的缓存控制，并使用 HTTPS 全链路传输。与此同时，清单和分片缓存策略应与密钥策略区分配置，避免“一刀切”造成命中率和安全性双双下降。</p>
+
+            <h2>5. 常见故障与排查顺序</h2>
+            <ul>
+                <li>现象：清单和分片 200，但播放器报解密失败。排查：先看密钥接口状态码与返回体长度。</li>
+                <li>现象：部分用户可播、部分用户不可播。排查：检查密钥接口鉴权规则是否与登录态一致。</li>
+                <li>现象：切码率后黑屏。排查：不同子清单密钥声明是否一致，轮换窗口是否覆盖旧分片。</li>
+                <li>现象：海外地区问题集中。排查：CDN 边缘缓存策略、TLS 证书链和时钟偏差。</li>
+            </ul>
+
+            <h2>6. 推荐上线清单</h2>
+            <p>上线前至少验证四件事：一是密钥接口必须鉴权且可审计；二是密钥轮换后旧会话不会立刻中断；三是密钥响应不被公共缓存；四是播放器端能正确处理 KEY 变化和重试逻辑。把这四项做到位，M3U8 加密才能从“看起来配置了”变成“真正能保护内容”。对内容平台而言，安全不是单点功能，而是长期运行中的策略和运营能力。</p>
+        </article>
+    </main>
+<footer class="footer">
+    <div>© 2026 m3u8live.cn - 仅限个人非商用使用</div>
+    <div class="footer-links">
+        <a href="/privacy.html">隐私政策</a>
+        <a href="/terms.html">服务条款</a>
+        <a href="/contact.html">联系我们</a>
+    </div>
+</footer>
+</body>
+</html>

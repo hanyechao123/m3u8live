@@ -77,6 +77,16 @@
   <lastmod>2026-02-23T08:50:25+00:00</lastmod>
   <priority>0.64</priority>
 </url>
+<url>
+  <loc>https://www.m3u8live.cn/tutorial_m3u8_low_latency.html</loc>
+  <lastmod>2026-03-06T00:00:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.m3u8live.cn/tutorial_m3u8_encryption.html</loc>
+  <lastmod>2026-03-06T00:00:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
 
 
 </urlset>
