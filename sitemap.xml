@@ -87,6 +87,16 @@
   <lastmod>2026-03-06T00:00:00+00:00</lastmod>
   <priority>0.64</priority>
 </url>
+<url>
+  <loc>https://www.m3u8live.cn/tutorial_m3u8_nginx.html</loc>
+  <lastmod>2026-03-14T00:00:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.m3u8live.cn/tutorial_m3u8_safari_ios.html</loc>
+  <lastmod>2026-03-14T00:00:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
 
 
 </urlset>

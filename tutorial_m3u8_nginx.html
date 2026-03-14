@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="/images/favicon-blue.svg" type="image/svg+xml">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M3U8 与 Nginx 部署指南：MIME、缓存、跨域一次配对</title>
+    <meta name="description" content="M3U8 Nginx 部署教程：MIME 类型、静态目录、CORS、缓存策略与常见 403/404 排查。">
+    <style>
+        :root { --bg:#f2f8ff; --ink:#1a1a1a; --muted:#5b748f; --accent:#2f79bf; --card:#fff; --border:#dbe9f7; --shadow:0 14px 40px rgba(10,10,10,.12); }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:var(--ink); background:radial-gradient(1200px 500px at 10% -10%, #e9f4ff 0%, transparent 60%), radial-gradient(900px 420px at 95% 10%, #dcebff 0%, transparent 65%), var(--bg); }
+        .hd { height:56px; border-bottom:1px solid var(--border); background:rgba(255,255,255,.75); }
+        .link-list { max-width:900px; height:100%; margin:0 auto; padding:0 16px; display:flex; align-items:center; gap:14px; }
+        .brand { margin-right:auto; font-weight:700; }
+        .link-list a { color:var(--ink); text-decoration:none; font-size:14px; }
+        .main { max-width:900px; margin:0 auto; padding:28px 16px 64px; }
+        .article { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow); line-height:1.8; }
+        h1 { font-size:30px; margin-bottom:10px; }
+        h2 { font-size:20px; margin:18px 0 8px; }
+        .footer { max-width:900px; margin:0 auto; padding:0 16px 24px; font-size:13px; color:#5b748f; }
+        .footer-links { margin-top:8px; display:flex; gap:14px; flex-wrap:wrap; }
+        .footer a { color:#2f79bf; text-decoration:none; }
+        p, li { color:#243648; }
+        ul { padding-left:20px; }
+        pre { background:#f4f9ff; border:1px solid var(--border); border-radius:10px; padding:12px; overflow:auto; }
+    </style>
+    <link rel="stylesheet" href="/styles/site-theme.css">
+</head>
+<body>
+    <header class="hd">
+        <div class="link-list">
+            <span class="brand">M3U8 Player</span>
+            <a href="/">首页</a>
+            <a href="/tutorials.html">教程中心</a>
+            <a href="/help.html">帮助中心</a>
+        </div>
+    </header>
+    <main class="main">
+        <article class="article">
+            <h1>M3U8 与 Nginx 部署指南：MIME、缓存、跨域一次配对</h1>
+            <p>很多 M3U8 链接在本地能访问，放到线上却出现“能下载、不能播放”“清单正常、分片 404”或“浏览器直接报跨域”的问题，根源通常不是播放器，而是 Web 服务配置不完整。Nginx 部署 HLS 时，至少要把静态目录映射、MIME 类型、缓存策略和跨域响应头配齐，否则前端很难稳定播放。与普通静态文件相比，M3U8 的特点是清单和分片的访问行为不同，直播与点播的缓存策略也不同，因此配置不能一刀切。</p>
+
+            <h2>1. 先确认目录结构与访问路径一致</h2>
+            <p>部署前先把输出目录整理清楚，例如 <code>/data/hls/live/stream/index.m3u8</code> 旁边放同目录分片，或者主清单引用相对路径的多码率子清单。Nginx 中最容易出错的是 <code>root</code> 与 <code>alias</code> 的理解不清，结果 URL 与实际文件路径拼接错位。建议先用浏览器或 <code>curl</code> 验证 m3u8 和任意一个 ts 文件都能直接返回 200，再去调播放器，否则排障会被无效日志干扰。</p>
+
+            <h2>2. MIME 类型一定要显式声明</h2>
+            <p>部分环境没有默认识别 m3u8 与 ts，返回成通用二进制后，某些客户端仍能勉强播放，但浏览器兼容性会变差。常见做法是为清单返回 <code>application/vnd.apple.mpegurl</code> 或兼容的 HLS 类型，为分片返回 <code>video/mp2t</code>，如果是 CMAF/fMP4 片段，还要给出对应的 mp4 类型。MIME 类型不是“可有可无”的装饰，它会影响播放器、CDN 甚至调试工具对资源的识别方式。</p>
+            <pre><code>types {
+    application/vnd.apple.mpegurl m3u8;
+    video/mp2t ts;
+}</code></pre>
+
+            <h2>3. CORS 要同时覆盖清单和分片</h2>
+            <p>浏览器播放 HLS 时，请求的不只是入口 m3u8，还包括子清单、ts、key 文件，甚至预检请求。很多站点只给 m3u8 加了 <code>Access-Control-Allow-Origin</code>，结果首个清单能打开，后续分片被拦截，页面上只看到笼统的播放失败。稳妥做法是把整段 HLS 路径统一加跨域头，必要时放行 <code>Range</code>、<code>Authorization</code> 等请求头，并处理好 <code>OPTIONS</code> 预检。</p>
+
+            <h2>4. 直播与点播缓存策略必须分开</h2>
+            <p>点播清单通常固定不变，分片也稳定，可以让 CDN 和浏览器长期缓存；直播清单则会不断更新，如果缓存过长，播放器会一直拿到旧列表，表现为卡在某个时间点不再前进。实践里通常会把直播 m3u8 设置成极短缓存或直接不缓存，而分片保留适度缓存时间，以减轻源站压力。不要把“全部静态资源缓存一天”这样的通用策略直接套到直播路径，这会制造很隐蔽的线上问题。</p>
+
+            <h2>5. 一份更接近实战的 location 规则</h2>
+            <p>如果你的 HLS 文件统一放在一个目录下，可以按路径集中管理。核心思路是：目录映射正确、MIME 明确、清单和分片分别控制缓存，同时补齐跨域头。配置写完后，至少检查一次响应头，确保与设计一致。</p>
+            <pre><code>location /hls/ {
+    alias /data/hls/;
+    add_header Access-Control-Allow-Origin * always;
+    add_header Access-Control-Allow-Headers "Range,Authorization,Content-Type" always;
+}
+
+location ~ \.m3u8$ {
+    expires -1;
+    add_header Cache-Control "no-cache" always;
+}
+
+location ~ \.ts$ {
+    expires 10m;
+    add_header Cache-Control "public, max-age=600" always;
+}</code></pre>
+
+            <h2>6. 常见错误怎么快速判断</h2>
+            <ul>
+                <li>返回 403：通常是目录权限、鉴权规则或 CDN 回源权限有问题。</li>
+                <li>返回 404：多半是清单里的相对路径不对，或 <code>alias</code> 映射错位。</li>
+                <li>浏览器报 CORS：说明请求已经发出，但响应头没有覆盖到实际访问的资源类型。</li>
+                <li>只有部分播放器能播：优先检查 MIME、编码格式和 key 文件是否可跨域访问。</li>
+            </ul>
+
+            <h2>7. 上线前的检查顺序</h2>
+            <p>建议按“文件是否存在、URL 是否可达、响应头是否正确、播放器是否兼容”这个顺序排查。先用命令行确认资源本身没问题，再看浏览器 Network 面板是否有跨域、206、Range 或缓存命中异常。只要 Nginx 这一层配得稳定，后续播放器排障会简单很多。对于有直播业务的网站，最好把这套 Nginx 规则固化为模板，避免每次新加流路径时重复踩坑。</p>
+        </article>
+    </main>
+<footer class="footer">
+    <div>© 2026 m3u8live.cn - 仅限个人非商用使用</div>
+    <div class="footer-links">
+        <a href="/privacy.html">隐私政策</a>
+        <a href="/terms.html">服务条款</a>
+        <a href="/contact.html">联系我们</a>
+    </div>
+</footer>
+</body>
+</html>
