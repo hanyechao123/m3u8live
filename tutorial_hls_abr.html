@@ -47,8 +47,49 @@
         <h2>三、实用优化方法</h2>
         <p>建议把码率梯度设计成平滑阶梯，而不是从 480p 直接跳到 1080p。分片时长尽量统一，常见做法是 4 到 6 秒，并确保关键帧对齐，减少跨档切换时的解码压力。主清单中应保证带宽字段准确，错误的 BANDWIDTH 会误导播放器决策。若业务重视首帧速度，可以先拉低码率首片快速起播，再在缓冲稳定后升档。对于直播，避免过度激进升档策略，否则会在网络轻微波动时出现“清晰度来回跳”。</p>
 
-        <h2>四、排障时看什么指标</h2>
+        <h2>四、实际案例分析：频繁降码率问题</h2>
+        <p>某视频平台用户反馈，观看过程中清晰度频繁在 720p 和 360p 之间切换，体验很差。排查过程：</p>
+        <ul style="margin-left: 20px; margin-top: 10px;">
+            <li><strong>步骤1</strong>：查看播放器日志，发现码率切换频率高达每分钟 10 次以上。</li>
+            <li><strong>步骤2>：分析网络状况，用户带宽稳定在 5Mbps，理论上足够流畅播放 720p。</li>
+            <li><strong>步骤3</strong>：检查主清单，发现 720p 档位标注带宽为 4Mbps，360p 档位为 1Mbps，中间没有过渡档位。</li>
+            <li><strong>步骤4</strong>：添加 540p 中间档位（2.5Mbps）后，码率切换变得平滑，用户体验明显改善。</li>
+        </ul>
+        <p style="margin-top: 10px;">这个案例说明，档位设计不合理会导致 ABR 算法频繁在高低档位间摇摆。合理的档位梯度是 ABR 稳定工作的基础。</p>
+
+        <h2>五、主清单配置示例</h2>
+        <p>以下是一个优化后的主清单示例，展示了平滑的码率梯度设计：</p>
+        <pre style="background: #f4f9ff; border: 1px solid #dbe9f7; border-radius: 10px; padding: 12px; overflow: auto;"><code>#EXTM3U
+#EXT-X-STREAM-INF:BANDWIDTH=400000,RESOLUTION=426x240
+240p/index.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=640x360
+360p/index.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=1500000,RESOLUTION=854x480
+480p/index.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=2500000,RESOLUTION=1280x720
+720p/index.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=4000000,RESOLUTION=1920x1080
+1080p/index.m3u8</code></pre>
+        <p style="margin-top: 10px;">关键要点：相邻档位带宽比控制在 1.5-2 倍之间，避免跨度太大导致切换突兀。</p>
+
+        <h2>六、排障时看什么指标</h2>
         <p>排障不要只看“最终清晰度”，还要同时看平均重缓冲次数、切换频率、播放中断率和首帧时间。如果切换频率高但卡顿少，通常是阈值偏敏感；如果切换频率低但卡顿多，可能是降档不够及时。建议结合播放器日志记录每次切档原因，再与 CDN 下载耗时对齐分析。把这些数据纳入持续监控后，ABR 调优就能从“感觉调参”变成“基于指标迭代”，稳定性会显著提升。</p>
+
+        <h2>七、ABR 配置最佳实践</h2>
+        <ul style="margin-left: 20px;">
+            <li><strong>档位数量</strong>：一般 4-6 个档位即可，过多会增加转码和存储成本，过少则切换不平滑。</li>
+            <li><strong>带宽估算窗口</strong>：建议取最近 3-5 个分片的下载速度平均值，避免瞬时波动影响判断。</li>
+            <li><strong>切换缓冲</strong>：设置最小切换间隔（如 10 秒），防止过于频繁的档位切换。</li>
+            <li><strong>安全余量</strong>：选择档位时保留 20% 带宽余量，应对网络波动。</li>
+            <li><strong>首帧策略</strong>：优先选择低码率档位起播，确保快速出画面，再逐步升档。</li>
+        </ul>
+
+        <h2>八、常见问题速查</h2>
+        <ul style="margin-left: 20px;">
+            <li><strong>Q: 为什么网络很好却一直不升档？</strong><br>A: 检查 BANDWIDTH 字段是否准确，以及播放器是否设置了保守的升档阈值。</li>
+            <li><strong>Q: 为什么一升档就卡顿？</strong><br>A: 可能是高码率分片体积过大，或 CDN 节点缓存未命中导致下载慢。</li>
+            <li><strong>Q: 直播和点播的 ABR 策略有何不同？</strong><br>A: 直播应更保守，避免频繁切换造成延迟累积；点播可以激进一些，优先保证清晰度。</li>
+        </ul>
     </article>
 </main>
 <footer class="footer">

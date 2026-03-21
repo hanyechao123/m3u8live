@@ -44,8 +44,64 @@
         <h2>二、如何解读测试结果</h2>
         <p>如果 VLC 可以稳定播放，但浏览器不能播放，问题通常集中在 CORS、MIME 类型、浏览器解码兼容或页面鉴权参数未透传。若 VLC 和浏览器都不能播放，优先排查链接有效期、签名、分片可访问性和源站状态。如果 VLC 能播几秒后断流，多半是直播清单更新异常、分片延迟过大，或中间层缓存把旧清单返回给了播放器。若 VLC 只有声音没有画面，常见原因是视频编码不兼容或关键帧间隔过长，建议回到转码参数核对 GOP 与编码格式。</p>
 
-        <h2>三、进阶排查建议</h2>
+        <h2>三、VLC 界面操作详解</h2>
+        <p>对于不熟悉 VLC 的用户，以下是详细的菜单路径说明：</p>
+        <ul style="margin-left: 20px; margin-top: 10px;">
+            <li><strong>打开网络串流</strong>：菜单栏 → 媒体 → 打开网络串流（快捷键 Ctrl+N），在 URL 输入框粘贴 M3U8 地址。</li>
+            <li><strong>查看编解码信息</strong>：播放状态下 → 工具 → 编解码信息（快捷键 Ctrl+J），可查看视频编码、分辨率、帧率、音频格式等。</li>
+            <li><strong>查看媒体信息</strong>：工具 → 媒体信息（快捷键 Ctrl+I），显示播放列表详情、元数据、统计信息等。</li>
+            <li><strong>查看日志</strong>：工具 → 消息，可设置日志详细程度，用于排查深层问题。</li>
+        </ul>
+
+        <h2>四、实际排查案例</h2>
+        <p><strong>案例：网页黑屏但 VLC 正常播放</strong></p>
+        <p>某用户反馈网页播放器黑屏，控制台无报错。排查过程：</p>
+        <ul style="margin-left: 20px; margin-top: 10px;">
+            <li><strong>步骤1</strong>：用 VLC 测试同一地址，播放正常，确认流本身没问题。</li>
+            <li><strong>步骤2</strong>：查看网页控制台 Network 面板，发现 m3u8 请求状态 200，但 ts 分片请求报 CORS 错误。</li>
+            <li><strong>步骤3</strong>：对比 VLC 和浏览器的请求差异，确认是浏览器跨域限制导致。</li>
+            <li><strong>步骤4</strong>：联系 CDN 配置分片文件的 CORS 头后，网页播放恢复正常。</li>
+        </ul>
+        <p style="margin-top: 10px;">这个案例展示了 VLC 的核心价值：快速区分"流问题"和"播放器环境问题"。</p>
+
+        <h2>五、VLC 与网页播放器对比</h2>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <tr style="background: #f4f9ff;">
+                <th style="border: 1px solid #dbe9f7; padding: 10px; text-align: left;">特性</th>
+                <th style="border: 1px solid #dbe9f7; padding: 10px; text-align: left;">VLC</th>
+                <th style="border: 1px solid #dbe9f7; padding: 10px; text-align: left;">网页播放器</th>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #dbe9f7; padding: 10px;">CORS 限制</td>
+                <td style="border: 1px solid #dbe9f7; padding: 10px;">无</td>
+                <td style="border: 1px solid #dbe9f7; padding: 10px;">有（必须配置）</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #dbe9f7; padding: 10px;">编码支持</td>
+                <td style="border: 1px solid #dbe9f7; padding: 10px;">广泛（内置解码器）</td>
+                <td style="border: 1px solid #dbe9f7; padding: 10px;">依赖浏览器</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #dbe9f7; padding: 10px;">调试信息</td>
+                <td style="border: 1px solid #dbe9f7; padding: 10px;">详细日志</td>
+                <td style="border: 1px solid #dbe9f7; padding: 10px;">控制台有限信息</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #dbe9f7; padding: 10px;">使用场景</td>
+                <td style="border: 1px solid #dbe9f7; padding: 10px;">本地验证、排障</td>
+                <td style="border: 1px solid #dbe9f7; padding: 10px;">线上播放、用户访问</td>
+            </tr>
+        </table>
+
+        <h2>六、进阶排查建议</h2>
         <p>为了提高定位效率，建议把“VLC 验证”纳入标准排障单：先验证主清单，再验证子清单，再抽查几个分片 URL。对带签名的播放地址，要确认清单和分片使用的是同一套鉴权规则，避免清单可读但分片过期。若你接了 CDN，记得检查是否存在边缘节点缓存不一致的问题，必要时在低峰期做灰度回源验证。最后，把可复现地址、报错时间点和 VLC 观察结果记录下来，再交给后端或运维处理，沟通成本会明显下降，问题也能更快闭环。</p>
+
+        <h2>七、常见问题速查</h2>
+        <ul style="margin-left: 20px;">
+            <li><strong>Q: VLC 提示"无法打开输入"？</strong><br>A: 检查 URL 是否完整、网络是否可达、链接是否包含必要的签名参数。</li>
+            <li><strong>Q: VLC 能播放但没有声音？</strong><br>A: 检查音频编码是否为 AAC，部分特殊编码（如 AC3）可能需要额外解码器。</li>
+            <li><strong>Q: 直播流播放一段时间后停止？</strong><br>A: 观察 VLC 日志，检查是否分片下载失败或清单更新异常。</li>
+        </ul>
     </article>
 </main>
 <footer class="footer">

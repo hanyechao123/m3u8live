@@ -53,7 +53,56 @@
 }</code></pre>
 
         <h2>四、生产环境建议</h2>
-        <p>生产环境不建议长期使用全放开策略，最好按业务域名白名单返回来源。若涉及鉴权，清单、分片、密钥三类资源应使用一致的跨域与鉴权组合，避免规则分裂。部署完成后，务必在浏览器开发者工具中抽查主清单、子清单、分片、密钥四类请求的响应头。最后把 CORS 校验纳入上线前检查项，这样能在发布阶段就拦截大量“上线后才发现无法播放”的问题。</p>
+        <p>生产环境不建议长期使用全放开策略，最好按业务域名白名单返回来源。若涉及鉴权，清单、分片、密钥三类资源应使用一致的跨域与鉴权组合，避免规则分裂。部署完成后，务必在浏览器开发者工具中抽查主清单、子清单、分片、密钥四类请求的响应头。最后把 CORS 校验纳入上线前检查项，这样能在发布阶段就拦截大量"上线后才发现无法播放"的问题。</p>
+
+        <h2>五、完整 Nginx 配置示例</h2>
+        <p>以下是一个更完整的 Nginx 配置，包含了对预检请求的处理、对凭证请求的支持，以及针对不同文件类型的缓存策略：</p>
+        <pre><code>server {
+    listen 80;
+    server_name stream.example.com;
+    root /var/www/stream;
+
+    # 处理预检请求
+    if ($request_method = 'OPTIONS') {
+        add_header 'Access-Control-Allow-Origin' $http_origin always;
+        add_header 'Access-Control-Allow-Methods' 'GET, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'Range, Authorization' always;
+        add_header 'Access-Control-Allow-Credentials' 'true' always;
+        add_header 'Access-Control-Max-Age' 86400 always;
+        return 204;
+    }
+
+    location ~* \\.m3u8$ {
+        add_header 'Access-Control-Allow-Origin' $http_origin always;
+        add_header 'Access-Control-Allow-Credentials' 'true' always;
+        add_header 'Cache-Control' 'no-cache' always;
+        try_files $uri =404;
+    }
+
+    location ~* \\.ts$ {
+        add_header 'Access-Control-Allow-Origin' $http_origin always;
+        add_header 'Access-Control-Allow-Credentials' 'true' always;
+        add_header 'Cache-Control' 'public, max-age=600' always;
+        try_files $uri =404;
+    }
+}</code></pre>
+
+        <h2>六、实际排查案例</h2>
+        <p>某开发团队反馈，他们的直播流在 Chrome 中无法播放，但在 Safari 中正常。排查过程如下：</p>
+        <ul style="margin-left: 20px; margin-top: 10px;">
+            <li><strong>步骤1</strong>：查看 Chrome 控制台，发现大量 CORS 错误，提示 "Access-Control-Allow-Origin" 头缺失。</li>
+            <li><strong>步骤2</strong>：检查 Nginx 配置，发现只配置了 .m3u8 文件的跨域头，没有配置 .ts 分片的跨域头。</li>
+            <li><strong>步骤3</strong>：Safari 能播放是因为 Safari 原生支持 HLS，不通过 XHR 请求分片，不受 CORS 限制。</li>
+            <li><strong>步骤4</strong>：在 Nginx 中添加 .ts 文件的跨域配置后，Chrome 播放恢复正常。</li>
+        </ul>
+        <p style="margin-top: 10px;">这个案例说明，跨域问题往往具有隐蔽性，不同浏览器的表现可能完全不同。排查时要结合浏览器开发者工具，逐一验证每个资源的响应头。</p>
+
+        <h2>七、常见问题速查</h2>
+        <ul style="margin-left: 20px;">
+            <li><strong>Q: 已经配置了 CORS，但播放器仍然报错？</strong><br>A: 检查 CDN 是否覆盖了源站的响应头，很多 CDN 有独立的 CORS 配置。</li>
+            <li><strong>Q: 为什么本地开发环境正常，上线后出问题？</strong><br>A: 本地开发通常是同源或禁用安全策略，线上环境跨域限制更严格。</li>
+            <li><strong>Q: 通配符 * 和具体域名有什么区别？</strong><br>A: 使用 * 时不能携带凭证（Cookie/Authorization），带凭证时必须指定具体域名。</li>
+        </ul>
     </article>
 </main>
 <footer class="footer">
