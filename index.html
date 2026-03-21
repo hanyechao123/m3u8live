@@ -273,40 +273,44 @@
             .card { padding: 16px; margin-bottom: 14px; }
         }
         @media screen and (max-width: 640px) {
-            .hd { height: 52px; }
+            .hd { height: auto; min-height: 60px; }
             .hd .link-list {
-                padding: 0 12px;
-                gap: 8px;
-                font-size: 13px;
+                padding: 12px 16px;
+                gap: 6px;
+                font-size: 14px;
+                flex-wrap: wrap;
             }
-            .brand { font-size: 14px; }
+            .brand { font-size: 15px; width: 100%; margin-bottom: 8px; }
             .hd .link-list a {
-                padding: 4px 8px;
-                font-size: 13px;
+                padding: 6px 10px;
+                font-size: 14px;
             }
             .lang-switch {
-                height: 28px;
-                padding: 0 6px;
-                font-size: 11px;
-                margin-left: 4px;
+                height: 32px;
+                padding: 0 8px;
+                font-size: 12px;
+                margin-left: auto;
             }
             .hero h1 { font-size: 24px; }
             .hero p { font-size: 14px; }
             #player { min-height: 220px; border-radius: 10px; }
             .form {
                 flex-direction: column;
-                gap: 10px;
+                gap: 12px;
             }
             .form input {
-                height: 48px;
-                padding: 0 14px;
-                font-size: 14px;
-                border-radius: 12px;
+                height: 80px !important;
+                min-height: 80px !important;
+                padding: 20px 24px !important;
+                font-size: 18px !important;
+                border-radius: 20px !important;
+                line-height: normal !important;
+                box-sizing: border-box !important;
             }
             .play-btn {
                 width: 100%;
-                height: 46px;
-                font-size: 15px;
+                height: 52px;
+                font-size: 16px;
             }
             .convert-actions { flex-direction: column; }
             .meta-grid {
